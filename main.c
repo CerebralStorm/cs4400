@@ -8,7 +8,20 @@
 char *int2bin(int a, char *buffer, int buf_size) {
     buffer += (buf_size - 1);
 
-    int i = 31;
+    int i = buf_size-1;
+    for (;i >= 0; i--) {
+        *buffer-- = (a & 1) + '0';
+
+        a >>= 1;
+    }
+
+    return buffer;
+}
+
+char *ll2bin(long long a, char *buffer, int buf_size) {
+    buffer += (buf_size - 1);
+
+    int i = buf_size-1;
     for (;i >= 0; i--) {
         *buffer-- = (a & 1) + '0';
 
@@ -108,17 +121,26 @@ int main (void)
 
   struct s1 str;  
   str.f0 = 0xF0E0D0C0;
-  str.f1 = 0xF0E0D0C0B0A09080ULL;
+  str.f1 = 0xF0E0D0C0B0A09080LL;
   str.f2 = 0xF0E0D0C0;
   str.f3 = 0xF0E0D0C0;
   str.f4 = 0xF0E0D0C0;
   str.f5 = 0xF0E0D0C0;
 
+  struct s1 result;
+
+  result = endian_swap_s1_ptr(str);
+
+  ll2bin(str.f1, longBuffer, LONG_BUF_SIZE - 1);
+  printf("orgnal = %s\n", longBuffer);
+  ll2bin(result.f1, longBuffer, LONG_BUF_SIZE - 1);
+  printf("result = %s\n", longBuffer);
+
   test_endian_swap_s1_shift(str);
   test_endian_swap_s1_shift_identity(str);
-  test_endian_swap_s1_ptr(str);
-  test_endian_swap_s1_ptr_identity(str);
-  test_endian_swap_are_equal(str);
+  //test_endian_swap_s1_ptr(str);
+  //test_endian_swap_s1_ptr_identity(str);
+  //test_endian_swap_are_equal(str);
 
   return 0;
 }

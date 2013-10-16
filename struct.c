@@ -52,7 +52,7 @@ int endian_swap_int_ptr(int x){
 	return result;
 }
 
-int endian_swap_long_long_ptr(long long x){
+long long endian_swap_long_long_ptr(long long x){
 	unsigned char * startx = (unsigned char *)(&x);
   unsigned char * endx = startx + sizeof(x)-1;
   long long result = 0;
