@@ -81,11 +81,42 @@ struct s1 endian_swap_s1_ptr (struct s1 str){
 /*-------------------------------------------------------*/
 
 
-void pack_s2 (char *c1, char *c2){
+void pack_s2 (char *c1, char *c2){	 
+	int i = 0;   
 
+  for (;i < 13; ++i)
+  {
+  	c1[0] = c2[0];
+    c1 += 1;
+    c2 += 1;
+  }
+  c2 += 2; // account for padding bits
+  i = 0; 
+  for (;i < 15; ++i)
+  {
+  	c1[0] = c2[0];
+    c1 += 1;
+    c2 += 1;
+  }
 }
 
 void unpack_S2 (char *c1, char *c2){
+	int i = 0;   
+
+  for (;i < 13; ++i)
+  {
+  	c1[0] = c2[0];
+    c1 += 1;
+    c2 += 1;
+  }
+  c1 += 2; // account for padding bits
+  i = 0; 
+  for (;i < 15; ++i)
+  {
+  	c1[0] = c2[0];
+    c1 += 1;
+    c2 += 1;
+  }
 
 }
 

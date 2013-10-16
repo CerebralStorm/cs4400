@@ -31,19 +31,6 @@ char *ll2bin(long long a, char *buffer, int buf_size) {
     return buffer;
 }
 
-char *longLong2Bin(long long a, char *buffer, int buf_size) {
-    buffer += (buf_size - 1);
-
-    int i = 63;
-    for (; i >= 0; i--) {
-        *buffer-- = (a & 1) + '0';
-
-        a >>= 1;
-    }
-
-    return buffer;
-}
-
 void test_endian_swap_s1_shift(struct s1 str){
   struct s1 result;
 
@@ -113,12 +100,8 @@ void test_endian_swap_are_equal(struct s1 str){
 
 int main (void)
 {
-  // Setup Variables
-  char buffer[BUF_SIZE];
-  buffer[BUF_SIZE - 1] = '\0';
-  char longBuffer[LONG_BUF_SIZE];
-  longBuffer[LONG_BUF_SIZE-1] = '\0';
-
+  ////////////////////////////////////////////////////
+  // endian_swap_s1_shift, endian_swap_s1_ptr
   struct s1 str;  
   str.f0 = 0xF0E0D0C0;
   str.f1 = 0xF0E0D0C0B0A09080LL;
@@ -128,19 +111,57 @@ int main (void)
   str.f5 = 0xF0E0D0C0;
 
   struct s1 result;
-
   result = endian_swap_s1_ptr(str);
-
-  ll2bin(str.f1, longBuffer, LONG_BUF_SIZE - 1);
-  printf("orgnal = %s\n", longBuffer);
-  ll2bin(result.f1, longBuffer, LONG_BUF_SIZE - 1);
-  printf("result = %s\n", longBuffer);
 
   test_endian_swap_s1_shift(str);
   test_endian_swap_s1_shift_identity(str);
-  //test_endian_swap_s1_ptr(str);
-  //test_endian_swap_s1_ptr_identity(str);
-  //test_endian_swap_are_equal(str);
+  test_endian_swap_s1_ptr(str);
+  test_endian_swap_s1_ptr_identity(str);
+  test_endian_swap_are_equal(str);
+
+  ////////////////////////////////////////////////////
+  // pack_s2
+  struct s2 str2_packed;
+  struct s2 str2;
+  str2.f0 = 0xFFFFFFFF;
+  str2.f1 = 0xEEEEEEEEEEEEEEEELL;
+  str2.f2 = 0xD;
+  str2.f3 = 0xC;
+  str2.f4 = 0xBBBBBBBBBBBBBBBBULL;
+  str2.f5 = 0xAAAAAAAAAAAAAAAAULL;
+
+  // // Setup Variables
+  char buffer[LONG_BUF_SIZE];
+  buffer[LONG_BUF_SIZE-1] = '\0';
+
+  printf( "Memory size occupied by str2_packed : %d\n", sizeof(struct s2_packed));
+  printf( "Memory size occupied by str2 : %d\n", sizeof(struct s2));
+
+  char * str2_packed_p = (char *)(&str2_packed);
+  char * str2_p = (char *)(&str2);  
+  
+  pack_s2(str2_packed_p, str2_p);
+
+  printf("first int: %i\n", str2_packed.f0);
+  printf("first int: %lld\n", str2_packed.f1);
+
+  
+
+  ll2bin(str2.f1, buffer, LONG_BUF_SIZE - 1);
+  printf("origin = %s\n", buffer);
+  ll2bin(str2.f1, buffer, LONG_BUF_SIZE - 1);
+  printf("result = %s\n", buffer);
+
+  // #pragma pack (1)
+  // struct s2_packed {
+  //   int f0;
+  //   long long f1;
+  //   unsigned char f2;
+  //   signed char f3;
+  //   unsigned long long f4;
+  //   unsigned long long f5;
+  // };
+  // #pragma pack ()
 
   return 0;
 }

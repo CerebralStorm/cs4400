@@ -12,6 +12,7 @@ struct s2 {
   long long f1;
   unsigned char f2;
   signed char f3;
+  // 2bytes
   unsigned long long f4;
   unsigned long long f5;
 };
