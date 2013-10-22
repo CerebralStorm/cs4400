@@ -2,34 +2,6 @@
 #include <assert.h>
 #include "struct.h"
 #include "funcs.h"
-#define BUF_SIZE 33
-#define LONG_BUF_SIZE 65
-
-char *int2bin(int a, char *buffer, int buf_size) {
-    buffer += (buf_size - 1);
-
-    int i = buf_size-1;
-    for (;i >= 0; i--) {
-        *buffer-- = (a & 1) + '0';
-
-        a >>= 1;
-    }
-
-    return buffer;
-}
-
-char *ll2bin(long long a, char *buffer, int buf_size) {
-    buffer += (buf_size - 1);
-
-    int i = buf_size-1;
-    for (;i >= 0; i--) {
-        *buffer-- = (a & 1) + '0';
-
-        a >>= 1;
-    }
-
-    return buffer;
-}
 
 void test_endian_swap_s1_shift(struct s1 str){
   struct s1 result;
@@ -226,7 +198,7 @@ void test_pack_s3_overflow(){
         assert(pack_s3(str3_bitfield_p, str3_p) == -1);
         break;
       case 3:
-        str3.f3 = 129;
+        str3.f3 = 256;
         assert(pack_s3(str3_bitfield_p, str3_p) == -1);
         break;
       case 4:
@@ -258,10 +230,10 @@ void test_pack_s3_value(){
 
   assert(str3_bitfield.f0 == 1);
   assert(str3_bitfield.f1 == 2);
-  //assert(str3_bitfield.f2 == 3);
+  assert(str3_bitfield.f2 == 3);
   assert(str3_bitfield.f3 == 4);
   assert(str3_bitfield.f4 == 5);
-  //assert(str3_bitfield.f5 == 6);
+  assert(str3_bitfield.f5 == 6);
 }
 
 void test_unpack_s3_value(){
@@ -269,22 +241,33 @@ void test_unpack_s3_value(){
   struct s3 str3;
 
   str3_bitfield.f0 = 1;
-  str3_bitfield.f1 = 2;
+  str3_bitfield.f1 = -1;
   str3_bitfield.f2 = 3;
   str3_bitfield.f3 = 4;
-  str3_bitfield.f4 = 5;
+  str3_bitfield.f4 = -1;
   str3_bitfield.f5 = 6;
 
   char * str3_bitfield_p = (char *)(&str3_bitfield);
   char * str3_p = (char *)(&str3);
   unpack_s3(str3_p, str3_bitfield_p); 
 
-  assert(str3.f0 == 1);
-  assert(str3.f1 == 2);
-  assert(str3.f2 == 3);
-  assert(str3.f3 == 4);
-  assert(str3.f4 == 5);
-  assert(str3.f5 == 6);
+  printf("%i\n", str3.f0);
+  printf("%i\n", str3.f1);
+  printf("%i\n", str3.f2);
+  printf("%i\n", str3.f3);
+  printf("%lli\n", str3.f4);
+  printf("%i\n", str3.f5);
+
+  // int i = 0; 
+  // char * example = (char *) & str3; 
+  // for (; i < sizeof(struct s3); i++) { printf("s3[%i] = %x\n", i, example[i]); }
+
+  // assert(str3.f0 == 1);
+  // assert(str3.f1 == -1);
+  // assert(str3.f2 == 3);
+  // assert(str3.f3 == 4);
+  // assert(str3.f4 == -1);
+  // assert(str3.f5 == 6);
 }
 
 void test_pack_s3_then_unpack_s3(){
@@ -306,12 +289,12 @@ void test_pack_s3_then_unpack_s3(){
   char * str3_unpacked_p = (char *)(&str3_unpacked);
   unpack_s3(str3_unpacked_p, str3_bitfield_p);
 
-  // assert(str3_unpacked.f0 == 1);
-  // assert(str3_unpacked.f1 == 2);
-  // assert(str3_unpacked.f2 == 3);
-  // assert(str3_unpacked.f3 == 4);
-  // assert(str3_unpacked.f4 == 5);
-  // assert(str3_unpacked.f5 == 6);
+  assert(str3_unpacked.f0 == 1);
+  assert(str3_unpacked.f1 == 2);
+  assert(str3_unpacked.f2 == 3);
+  assert(str3_unpacked.f3 == 4);
+  assert(str3_unpacked.f4 == 5);
+  assert(str3_unpacked.f5 == 6);
 
 }
 
@@ -401,29 +384,3 @@ int main (void)
 
   return 0;
 }
-
-  // char * str3_bitfield_p = (char *)(&str3_bitfield);
-  // char * str3_p = (char *)(&str3);   
-  // pack_s3(str3_bitfield_p, str3_p); 
-
-  // printf("%i\n", str3_bitfield.f0);
-  // printf("%i\n", str3_bitfield.f1);
-  // printf("%i\n", str3_bitfield.f2);
-  // printf("%i\n", str3_bitfield.f3);
-  // printf("%i\n", str3_bitfield.f4);
-  // printf("%i\n", str3_bitfield.f5);
-
-  // i = 0; 
-  // example = (char *) & str3_bitfield; 
-  // for (; i < sizeof(struct s3_bitfield); i++) { printf("bitfield[%i] = %x\n", i, example[i]); }
-
-  // int i = 0; 
-  // char * example = (char *) & str3_bitfield; 
-  // for (; i < sizeof(struct s3_bitfield); i++) { printf("bitfield[%i] = %x\n", i, example[i]); }
-
-  // printf("%i\n", str3_bitfield.f0);
-  // printf("%i\n", str3_bitfield.f1);
-  // printf("%i\n", str3_bitfield.f2);
-  // printf("%i\n", str3_bitfield.f3);
-  // printf("%i\n", str3_bitfield.f4);
-  // printf("%i\n", str3_bitfield.f5);

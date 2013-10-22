@@ -111,16 +111,29 @@ void unpack_S2 (char *c1, char *c2){
   }
 }
 
-int pack_s3 (char *c1, char *c2){
+void printBits(short num)
+{
+  int bit=0;
+  for(;bit<(sizeof(short) * 8); bit++) {
+    if(bit % 4 == 0)
+      printf(" ");
+  
+    printf("%i", num & 0x01);
+    num = num >> 1;
+  }
+  printf("\n");
+}
+
+int pack_s3 (char *bitfield, char *unpacked){
   int result = 0;
 
   // check bounds
-  short * f0 = (short *) c2;
-  short * f1 = (short *) (c2+2);
-  unsigned short * f2 = (unsigned short *) (c2+4);
-  unsigned int * f3 = (unsigned int *) (c2+8);
-  long long * f4 = (long long *) (c2+12);
-  unsigned short * f5 = (unsigned short *) (c2+20);
+  short * f0 = (short *) unpacked;
+  short * f1 = (short *) (unpacked+2);
+  unsigned short * f2 = (unsigned short *) (unpacked+4);
+  unsigned int * f3 = (unsigned int *) (unpacked+8);
+  long long * f4 = (long long *) (unpacked+12);
+  unsigned short * f5 = (unsigned short *) (unpacked+20);
 
   if(*f0 > 127 || *f0 < -128)
     result = -1;  
@@ -128,36 +141,59 @@ int pack_s3 (char *c1, char *c2){
     result = -1;  
   else if(*f2 > 4095)
     result = -1;
-  else if(*f3 > 128)
+  else if(*f3 > 255)
     result = -1;
-  else if(*f4 > 511 || *f4 < -512)
+  else if(*f4 > 255 || *f4 < -256)
     result = -1;
-  else if(*f5 > 65536)
+  else if(*f5 > 65535)
     result = -1;
 
-  // copy bits
-  c1[0] = *f0;
-  c1[1] = *f1;
-  c1[2] = *f2;
-  c1[4] = *f3;
-  c1[5] = *f4;
-  c1[8] = *f5;
+  // copy bits  
+  bitfield[0] = unpacked[0]; 
+  bitfield[1] = unpacked[2]; 
+  bitfield[2] = unpacked[4]; 
+  bitfield[3] = unpacked[5] & 0xF; 
+  bitfield[4] = unpacked[8];
+  bitfield[5] = unpacked[12];
+  bitfield[6] = unpacked[13] & 0x1;
+  bitfield[8] = unpacked[20];
+  bitfield[9] = unpacked[21];
 
 	return result;
 }
 
-void unpack_s3 (char *c1, char *c2){
-  short * f0 = (short *) c2;
-  short * f1 = (short *) (c2+2);
-  unsigned short * f2 = (unsigned short *) (c2+4);
-  unsigned int * f3 = (unsigned int *) (c2+8);
-  long long * f4 = (long long *) (c2+12);
+void unpack_s3 (char *unpacked, char *bitfield){ 
+  int i = 0;
+  for (; i < 24; ++i){
+    unpacked[i] = 0;
+  }
 
-  *f0 = c1[0];
-  *f1 = c1[2];
-  *f2 = c1[4];
-  *f3 = c1[8];
-  *f4 = c1[12];
+  unpacked[0] = bitfield[0]; 
+  char sign_bit = (bitfield[1] >> 2) & 0x01;
+  if (sign_bit) {
+    unpacked[2] = 0xF8 | bitfield[1];
+    unpacked[3] = 0xFF;
+  } else {
+    unpacked[2] = bitfield[1];
+  }    
+ 
+  unpacked[4] = bitfield[2]; 
+  unpacked[8] = bitfield[4];
+
+  sign_bit = bitfield[6] & 0x01;
+  if (sign_bit) {
+    unpacked[12] = bitfield[5]; 
+    unpacked[13] = bitfield[6] | 0xFE; 
+    unpacked[14] = 0xFF;
+    unpacked[15] = 0xFF;
+    unpacked[16] = 0xFF;
+    unpacked[17] = 0xFF;
+    unpacked[18] = 0xFF;
+    unpacked[19] = 0xFF;
+  } else {
+    unpacked[12] = bitfield[5];
+    unpacked[13] = bitfield[6] & 0x1;
+  }
+
+  unpacked[20] = bitfield[8];
 }
-
-
