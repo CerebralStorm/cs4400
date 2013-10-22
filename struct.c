@@ -84,17 +84,13 @@ struct s1 endian_swap_s1_ptr (struct s1 str){
 void pack_s2 (char *c1, char *c2){	 
 	int i = 0;   
 
-  for (;i < 13; ++i)
-  {
+  for (;i < 32; ++i){
   	c1[0] = c2[0];
-    c1 += 1;
-    c2 += 1;
-  }
-  c2 += 2; // account for padding bits
-  i = 0; 
-  for (;i < 15; ++i)
-  {
-  	c1[0] = c2[0];
+
+  	if(i == 13) {
+  		c2 += 2;
+  	}
+
     c1 += 1;
     c2 += 1;
   }
@@ -103,29 +99,65 @@ void pack_s2 (char *c1, char *c2){
 void unpack_S2 (char *c1, char *c2){
 	int i = 0;   
 
-  for (;i < 13; ++i)
-  {
+  for (;i < 32; ++i){
   	c1[0] = c2[0];
-    c1 += 1;
-    c2 += 1;
-  }
-  c1 += 2; // account for padding bits
-  i = 0; 
-  for (;i < 15; ++i)
-  {
-  	c1[0] = c2[0];
-    c1 += 1;
-    c2 += 1;
-  }
 
+  	if(i == 13) {
+  		c1 += 2;
+  	}
+  	
+    c1 += 1;
+    c2 += 1;
+  }
 }
 
 int pack_s3 (char *c1, char *c2){
-	return 0;
+  int result = 0;
+
+  // check bounds
+  short * f0 = (short *) c2;
+  short * f1 = (short *) (c2+2);
+  unsigned short * f2 = (unsigned short *) (c2+4);
+  unsigned int * f3 = (unsigned int *) (c2+8);
+  long long * f4 = (long long *) (c2+12);
+  unsigned short * f5 = (unsigned short *) (c2+20);
+
+  if(*f0 > 127 || *f0 < -128)
+    result = -1;  
+  else if(*f1 > 3 || *f1 < -4)
+    result = -1;  
+  else if(*f2 > 4095)
+    result = -1;
+  else if(*f3 > 128)
+    result = -1;
+  else if(*f4 > 511 || *f4 < -512)
+    result = -1;
+  else if(*f5 > 65536)
+    result = -1;
+
+  // copy bits
+  c1[0] = *f0;
+  c1[1] = *f1;
+  c1[2] = *f2;
+  c1[4] = *f3;
+  c1[5] = *f4;
+  c1[8] = *f5;
+
+	return result;
 }
 
 void unpack_s3 (char *c1, char *c2){
+  short * f0 = (short *) c2;
+  short * f1 = (short *) (c2+2);
+  unsigned short * f2 = (unsigned short *) (c2+4);
+  unsigned int * f3 = (unsigned int *) (c2+8);
+  long long * f4 = (long long *) (c2+12);
 
+  *f0 = c1[0];
+  *f1 = c1[2];
+  *f2 = c1[4];
+  *f3 = c1[8];
+  *f4 = c1[12];
 }
 
 
